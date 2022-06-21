@@ -12,6 +12,7 @@ keywords = ["prompt", "inquirer", "prompt-toolkit"]
 
 [tool.poetry.dependencies]
 python = "^3.7.3"
+prompt-toolkit = "^3.0.29"
 
 [tool.poetry.dev-dependencies]
 isort = "^5.10.1"
