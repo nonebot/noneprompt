@@ -19,6 +19,9 @@ isort = "^5.10.1"
 black = "^22.3.0"
 pre-commit = "^2.16.0"
 
+[tool.poetry.scripts]
+noneprompt = "noneprompt.__main__:main"
+
 [tool.black]
 line-length = 88
 target-version = ["py38", "py39", "py310"]
