@@ -44,6 +44,7 @@ class InputPrompt(BasePrompt[str]):
             name=DEFAULT_BUFFER,
             validator=self.validator and Validator.from_callable(self.validator),
             accept_handler=self._submit,
+            multiline=False,
         )
 
     def _build_layout(self) -> Layout:

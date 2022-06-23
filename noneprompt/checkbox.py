@@ -1,4 +1,5 @@
 import os
+from functools import lru_cache
 from typing import Set, List, Tuple, TypeVar, Callable, Optional
 
 from prompt_toolkit.styles import Style
@@ -11,7 +12,7 @@ from prompt_toolkit.key_binding import KeyBindings, KeyPressEvent
 from prompt_toolkit.mouse_events import MouseEvent, MouseEventType
 from prompt_toolkit.layout.containers import HSplit, Window, ConditionalContainer
 
-from .utils import Choice
+from ._choice import Choice
 from ._base import NO_ANSWER, BasePrompt
 
 RT = TypeVar("RT")
@@ -228,6 +229,7 @@ class CheckboxPrompt(BasePrompt[Tuple[Choice[RT], ...]]):
             if index in self._selected
         )
 
+    @lru_cache
     def _get_mouse_handler(
         self, index: Optional[int] = None
     ) -> Callable[[MouseEvent], None]:
