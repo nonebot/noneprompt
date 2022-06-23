@@ -5,9 +5,9 @@ description = "Prompt toolkit for console interaction"
 authors = ["yanyongyu <yyy@nonebot.dev>"]
 license = "MIT"
 readme = "README.md"
-homepage = "Prompt toolkit for console interaction"
+homepage = "https://github.com/nonebot/noneprompt"
 repository = "https://github.com/nonebot/noneprompt"
-documentation = "Prompt toolkit for console interaction"
+documentation = "https://github.com/nonebot/noneprompt"
 keywords = ["prompt", "inquirer", "prompt-toolkit"]
 
 [tool.poetry.dependencies]
