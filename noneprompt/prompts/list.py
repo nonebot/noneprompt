@@ -75,7 +75,7 @@ class ListPrompt(BasePrompt[Choice[RT]]):
         return [choice for choice in self.choices if self._buffer.text in choice.name]
 
     def _reset(self):
-        self._answered: bool = False
+        self._answered: Optional[Choice] = None
         self._buffer: Buffer = Buffer(
             name=DEFAULT_BUFFER,
             multiline=False,
@@ -144,9 +144,16 @@ class ListPrompt(BasePrompt[Choice[RT]]):
 
         @kb.add("enter", eager=True)
         def enter(event: KeyPressEvent):
-            self._answered = True
+            # no answer selected
+            if not self.filtered_choices:
+                return
+
+            # get result first
+            result = self.filtered_choices[self._index]
+            self._answered = result
+            # then clear buffer
             self._buffer.reset()
-            event.app.exit(result=self.choices[self._index])
+            event.app.exit(result=result)
 
         @kb.add("c-c", eager=True)
         @kb.add("c-q", eager=True)
@@ -166,7 +173,7 @@ class ListPrompt(BasePrompt[Choice[RT]]):
         prompts.append(("class:question", self.question.strip()))
         prompts.append(("", " "))
         if self._answered:
-            prompts.append(("class:answer", self.choices[self._index].name.strip()))
+            prompts.append(("class:answer", self._answered.name.strip()))
         else:
             prompts.append(("class:annotation", self.annotation))
             prompts.append(("", " "))
