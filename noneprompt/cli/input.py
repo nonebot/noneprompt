@@ -14,6 +14,7 @@ from ._options import (
 
 def input_prompt_main(
     question: str,
+    default_text: Optional[str] = None,
     *,
     no_ansi: bool = False,
     default: Optional[str] = None,
@@ -23,7 +24,9 @@ def input_prompt_main(
     answer_style: Optional[str] = None,
     **kwargs,
 ):
-    prompt = InputPrompt(question, question_mark=question_mark)
+    prompt = InputPrompt(
+        question, default_text=default_text, question_mark=question_mark
+    )
     prompt.prompt(
         default=default,
         no_ansi=no_ansi,

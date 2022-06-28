@@ -55,7 +55,6 @@ confirm_prompt.add_argument(
     "-d",
     "--default-choice",
     type=str2bool,
-    choices=BOOLEAN_STRING,
     required=False,
     help="default choice",
 )

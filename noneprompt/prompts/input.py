@@ -30,11 +30,13 @@ class InputPrompt(BasePrompt[str]):
     def __init__(
         self,
         question: str,
+        default_text: Optional[str] = None,
         *,
         question_mark: Optional[str] = None,
         validator: Optional[Callable[[str], bool]] = None,
     ):
         self.question: str = question
+        self.default_text: Optional[str] = default_text
         self.question_mark: str = "[?]" if question_mark is None else question_mark
         self.validator: Optional[Callable[[str], bool]] = validator
 
@@ -46,6 +48,8 @@ class InputPrompt(BasePrompt[str]):
             accept_handler=self._submit,
             multiline=False,
         )
+        if self.default_text:
+            self._buffer.insert_text(self.default_text)
 
     def _build_layout(self) -> Layout:
         self._reset()

@@ -114,7 +114,7 @@ class ConfirmPrompt(BasePrompt[bool]):
         self._answered = True
         input = buffer.document.text
         if not input:
-            buffer.document.insert_after(str(self.default_choice))
+            buffer.insert_text("Yes" if self.default_choice else "No")
             get_app().exit(result=self.default_choice)
         else:
             get_app().exit(result=str2bool(input))
