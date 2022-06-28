@@ -18,26 +18,6 @@ from ._options import (
     question_mark_style_option,
 )
 
-list_prompt = subparsers.add_parser(
-    "list",
-    description="List prompt.",
-    parents=[
-        question_mark_option,
-        question_mark_style_option,
-        question_style_option,
-        annotation_option,
-        annotation_style_option,
-        filter_style_option,
-        answer_style_option,
-        pointer_option,
-        pointer_style_option,
-        select_style_option,
-        unselect_style_option,
-    ],
-)
-list_prompt.add_argument("question", help="prompt question")
-list_prompt.add_argument("choices", nargs="+", help="choices")
-
 
 def list_prompt_main(
     question: str,
@@ -79,3 +59,25 @@ def list_prompt_main(
             unselected=unselect_style,
         ),
     )
+
+
+list_prompt = subparsers.add_parser(
+    "list",
+    description="List prompt.",
+    parents=[
+        question_mark_option,
+        question_mark_style_option,
+        question_style_option,
+        annotation_option,
+        annotation_style_option,
+        filter_style_option,
+        answer_style_option,
+        pointer_option,
+        pointer_style_option,
+        select_style_option,
+        unselect_style_option,
+    ],
+)
+list_prompt.add_argument("question", help="prompt question")
+list_prompt.add_argument("choices", nargs="+", help="choices")
+list_prompt.set_defaults(func=list_prompt_main)

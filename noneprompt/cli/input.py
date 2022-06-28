@@ -11,18 +11,6 @@ from ._options import (
     question_mark_style_option,
 )
 
-input_prompt = subparsers.add_parser(
-    "input",
-    description="Input prompt.",
-    parents=[
-        question_mark_option,
-        question_mark_style_option,
-        question_style_option,
-        answer_style_option,
-    ],
-)
-input_prompt.add_argument("question", help="prompt question")
-
 
 def input_prompt_main(
     question: str,
@@ -45,3 +33,23 @@ def input_prompt_main(
             answer=answer_style,
         ),
     )
+
+
+input_prompt = subparsers.add_parser(
+    "input",
+    description="Input prompt.",
+    parents=[
+        question_mark_option,
+        question_mark_style_option,
+        question_style_option,
+        answer_style_option,
+    ],
+)
+input_prompt.add_argument(
+    "-d",
+    "--default-text",
+    required=False,
+    help="default text",
+)
+input_prompt.add_argument("question", help="prompt question")
+input_prompt.set_defaults(func=input_prompt_main)

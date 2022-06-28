@@ -12,27 +12,6 @@ from ._options import (
     question_mark_style_option,
 )
 
-confirm_prompt = subparsers.add_parser(
-    "confirm",
-    description="Confirm prompt.",
-    parents=[
-        question_mark_option,
-        question_mark_style_option,
-        question_style_option,
-        annotation_style_option,
-        answer_style_option,
-    ],
-)
-confirm_prompt.add_argument(
-    "-d",
-    "--default-choice",
-    type=str2bool,
-    choices=BOOLEAN_STRING,
-    required=False,
-    help="default choice",
-)
-confirm_prompt.add_argument("question", help="prompt question")
-
 
 def confirm_prompt_main(
     question: str,
@@ -59,3 +38,26 @@ def confirm_prompt_main(
             answer=answer_style,
         ),
     )
+
+
+confirm_prompt = subparsers.add_parser(
+    "confirm",
+    description="Confirm prompt.",
+    parents=[
+        question_mark_option,
+        question_mark_style_option,
+        question_style_option,
+        annotation_style_option,
+        answer_style_option,
+    ],
+)
+confirm_prompt.add_argument(
+    "-d",
+    "--default-choice",
+    type=str2bool,
+    choices=BOOLEAN_STRING,
+    required=False,
+    help="default choice",
+)
+confirm_prompt.add_argument("question", help="prompt question")
+confirm_prompt.set_defaults(func=confirm_prompt_main)

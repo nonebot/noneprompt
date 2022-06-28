@@ -21,29 +21,6 @@ from ._options import (
     question_mark_style_option,
 )
 
-checkbox_prompt = subparsers.add_parser(
-    "checkbox",
-    description="Checkbox prompt.",
-    parents=[
-        question_mark_option,
-        question_mark_style_option,
-        question_style_option,
-        annotation_option,
-        annotation_style_option,
-        answer_style_option,
-        pointer_option,
-        pointer_style_option,
-        sign_option,
-        sign_style_option,
-        unsign_option,
-        unsign_style_option,
-        select_style_option,
-        unselect_style_option,
-    ],
-)
-checkbox_prompt.add_argument("question", help="prompt question")
-checkbox_prompt.add_argument("choices", nargs="+", help="choices")
-
 
 def checkbox_prompt_main(
     question: str,
@@ -91,3 +68,28 @@ def checkbox_prompt_main(
             unselected=unselect_style,
         ),
     )
+
+
+checkbox_prompt = subparsers.add_parser(
+    "checkbox",
+    description="Checkbox prompt.",
+    parents=[
+        question_mark_option,
+        question_mark_style_option,
+        question_style_option,
+        annotation_option,
+        annotation_style_option,
+        answer_style_option,
+        pointer_option,
+        pointer_style_option,
+        sign_option,
+        sign_style_option,
+        unsign_option,
+        unsign_style_option,
+        select_style_option,
+        unselect_style_option,
+    ],
+)
+checkbox_prompt.add_argument("question", help="prompt question")
+checkbox_prompt.add_argument("choices", nargs="+", help="choices")
+checkbox_prompt.set_defaults(func=checkbox_prompt_main)
