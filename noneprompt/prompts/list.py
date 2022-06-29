@@ -90,7 +90,11 @@ class ListPrompt(BasePrompt[Choice[RT]]):
         self._reset()
         if self.allow_filter:
             prompt_line = Window(
-                BufferControl(self._buffer, lexer=SimpleLexer("class:filter")),
+                BufferControl(
+                    self._buffer,
+                    lexer=SimpleLexer("class:filter"),
+                    focus_on_click=~is_done,
+                ),
                 dont_extend_height=True,
                 get_line_prefix=self._get_line_prefix,
             )
