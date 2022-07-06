@@ -13,7 +13,7 @@ RT = TypeVar("RT")
 NO_ANSWER = ...
 
 
-class CanceledError(Exception):
+class CancelledError(Exception):
     """User cancelled answer."""
 
 
@@ -60,5 +60,5 @@ class BasePrompt(abc.ABC, Generic[RT]):
         if result is not NO_ANSWER:
             return result
         if default is None:
-            raise CanceledError("No answer selected!")
+            raise CancelledError("No answer selected!")
         return default
