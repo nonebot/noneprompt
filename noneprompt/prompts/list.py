@@ -72,7 +72,11 @@ class ListPrompt(BasePrompt[Choice[RT]]):
 
     @property
     def filtered_choices(self) -> List[Choice[RT]]:
-        return [choice for choice in self.choices if self._buffer.text in choice.name]
+        return [
+            choice
+            for choice in self.choices
+            if self._buffer.text.lower() in choice.name.lower()
+        ]
 
     def _reset(self):
         self._answered: Optional[Choice] = None
