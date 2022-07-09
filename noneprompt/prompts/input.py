@@ -1,8 +1,9 @@
-from typing import Callable, Optional
+from typing import Union, Callable, Optional
 
 from prompt_toolkit.styles import Style
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.layout import Layout
+from prompt_toolkit.filters import Filter
 from prompt_toolkit.lexers import SimpleLexer
 from prompt_toolkit.application import get_app
 from prompt_toolkit.enums import DEFAULT_BUFFER
@@ -11,6 +12,7 @@ from prompt_toolkit.layout.controls import BufferControl
 from prompt_toolkit.formatted_text import AnyFormattedText
 from prompt_toolkit.layout.containers import HSplit, Window
 from prompt_toolkit.key_binding import KeyBindings, KeyPressEvent
+from prompt_toolkit.layout.processors import PasswordProcessor, ConditionalProcessor
 
 from ._base import NO_ANSWER, BasePrompt
 
@@ -31,12 +33,14 @@ class InputPrompt(BasePrompt[str]):
         self,
         question: str,
         default_text: Optional[str] = None,
+        is_password: Union[bool, Filter] = False,
         *,
         question_mark: Optional[str] = None,
         validator: Optional[Callable[[str], bool]] = None,
     ):
         self.question: str = question
         self.default_text: Optional[str] = default_text
+        self.is_password: Union[bool, Filter] = is_password
         self.question_mark: str = "[?]" if question_mark is None else question_mark
         self.validator: Optional[Callable[[str], bool]] = validator
 
@@ -57,7 +61,15 @@ class InputPrompt(BasePrompt[str]):
             HSplit(
                 [
                     Window(
-                        BufferControl(self._buffer, lexer=SimpleLexer("class:answer")),
+                        BufferControl(
+                            self._buffer,
+                            input_processors=[
+                                ConditionalProcessor(
+                                    PasswordProcessor(), self.is_password
+                                )
+                            ],
+                            lexer=SimpleLexer("class:answer"),
+                        ),
                         dont_extend_height=True,
                         get_line_prefix=self._get_prompt,
                     )

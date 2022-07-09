@@ -129,14 +129,14 @@ python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*
 
 [[package]]
 name = "nonemoji"
-version = "0.1.0"
+version = "0.1.2"
 description = "Simple gitmoji cli written in python"
 category = "dev"
 optional = false
 python-versions = ">=3.7.3,<4.0.0"
 
 [package.dependencies]
-noneprompt = ">=0.1.0,<0.2.0"
+noneprompt = ">=0.1.3,<0.2.0"
 
 [[package]]
 name = "pathspec"
@@ -344,10 +344,7 @@ nodeenv = [
     {file = "nodeenv-1.7.0-py2.py3-none-any.whl", hash = "sha256:27083a7b96a25f2f5e1d8cb4b6317ee8aeda3bdd121394e5ac54e498028a042e"},
     {file = "nodeenv-1.7.0.tar.gz", hash = "sha256:e0e7f7dfb85fc5394c6fe1e8fa98131a2473e04311a45afb6508f7cf1836fa2b"},
 ]
-nonemoji = [
-    {file = "nonemoji-0.1.0-py3-none-any.whl", hash = "sha256:965eebd09f715bd8a4a647e49e379349aaa04887f60b7659bc06b76744a8b792"},
-    {file = "nonemoji-0.1.0.tar.gz", hash = "sha256:7659980edff2534b54acac92aff2ab8d87215f15a74d686efdbed9a1e09cca8e"},
-]
+nonemoji = []
 pathspec = [
     {file = "pathspec-0.9.0-py2.py3-none-any.whl", hash = "sha256:7d15c4ddb0b5c802d161efc417ec1a2558ea2653c2e8ad9c19098201dc1c993a"},
     {file = "pathspec-0.9.0.tar.gz", hash = "sha256:e564499435a2673d586f6b2130bb5b95f04a3ba06f81b8f895b651a3c76aabb1"},
