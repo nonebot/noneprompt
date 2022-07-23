@@ -80,9 +80,9 @@ class InputPrompt(BasePrompt[str]):
     def _build_style(self, style: Style) -> Style:
         default = Style(
             [
-                ("questionmark", "fg:#5F819D"),
+                ("questionmark", "fg:#673AB7 bold"),
                 ("question", "bold"),
-                ("answer", "fg:#5F819D"),
+                ("answer", "fg:#FF9D00"),
             ]
         )
         return Style([*default.style_rules, *style.style_rules])
