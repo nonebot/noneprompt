@@ -30,6 +30,12 @@ annotation_style_option.add_argument(
     "-ans", "--annotation-style", required=False, help="annotation style"
 )
 
+# input style option
+input_style_option = ArgumentParser(add_help=False)
+input_style_option.add_argument(
+    "-is", "--input-style", required=False, help="input style"
+)
+
 # answer style option
 answer_style_option = ArgumentParser(add_help=False)
 answer_style_option.add_argument(

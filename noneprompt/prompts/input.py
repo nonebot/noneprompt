@@ -4,13 +4,13 @@ from prompt_toolkit.styles import Style
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.layout import Layout
 from prompt_toolkit.filters import Filter
-from prompt_toolkit.lexers import SimpleLexer
 from prompt_toolkit.application import get_app
 from prompt_toolkit.enums import DEFAULT_BUFFER
 from prompt_toolkit.validation import Validator
 from prompt_toolkit.layout.controls import BufferControl
 from prompt_toolkit.formatted_text import AnyFormattedText
 from prompt_toolkit.layout.containers import HSplit, Window
+from prompt_toolkit.lexers import SimpleLexer, DynamicLexer
 from prompt_toolkit.key_binding import KeyBindings, KeyPressEvent
 from prompt_toolkit.layout.processors import PasswordProcessor, ConditionalProcessor
 
@@ -25,7 +25,7 @@ class InputPrompt(BasePrompt[str]):
     ```
     [?] Choose a choice and return? answer
     └┬┘ └──────────────┬──────────┘ └──┬─┘
-    questionmark    question        answer
+    questionmark    question      input/answer
     ```
     """
 
@@ -68,7 +68,13 @@ class InputPrompt(BasePrompt[str]):
                                     PasswordProcessor(), self.is_password
                                 )
                             ],
-                            lexer=SimpleLexer("class:answer"),
+                            lexer=DynamicLexer(
+                                lambda: (
+                                    SimpleLexer("class:answer")
+                                    if self._answered
+                                    else SimpleLexer("class:input")
+                                )
+                            ),
                         ),
                         dont_extend_height=True,
                         get_line_prefix=self._get_prompt,

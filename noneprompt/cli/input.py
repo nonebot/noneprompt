@@ -5,6 +5,7 @@ from noneprompt.prompts import InputPrompt
 
 from . import subparsers
 from ._options import (
+    input_style_option,
     answer_style_option,
     question_mark_option,
     question_style_option,
@@ -21,6 +22,7 @@ def input_prompt_main(
     question_style: Optional[str] = None,
     question_mark: Optional[str] = None,
     question_mark_style: Optional[str] = None,
+    input_style: Optional[str] = None,
     answer_style: Optional[str] = None,
     **kwargs,
 ):
@@ -33,6 +35,7 @@ def input_prompt_main(
         style=build_style(
             question=question_style,
             questionmark=question_mark_style,
+            input=input_style,
             answer=answer_style,
         ),
     )
@@ -45,6 +48,7 @@ input_prompt = subparsers.add_parser(
         question_mark_option,
         question_mark_style_option,
         question_style_option,
+        input_style_option,
         answer_style_option,
     ],
 )
