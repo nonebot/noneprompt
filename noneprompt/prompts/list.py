@@ -67,7 +67,9 @@ class ListPrompt(BasePrompt[Choice[RT]]):
         self._index: int = 0
         self._display_index: int = 0
         self._max_height: Optional[int] = max_height
+
         self._last_mouse_up: float = 0
+        self._last_mouse_index: int = 0
 
     @property
     def max_height(self) -> int:
@@ -242,10 +244,13 @@ class ListPrompt(BasePrompt[Choice[RT]]):
         def _handle_mouse(event: MouseEvent) -> None:
             if event.event_type == MouseEventType.MOUSE_UP and index is not None:
                 self._jump_to(index)
-                if (time() - self._last_mouse_up) < 0.3:
+                if (
+                    time() - self._last_mouse_up
+                ) < 0.3 and index == self._last_mouse_index:
                     self._finish()
                 else:
                     self._last_mouse_up = time()
+                    self._last_mouse_index = index
             elif event.event_type == MouseEventType.SCROLL_UP:
                 self._handle_up()
             elif event.event_type == MouseEventType.SCROLL_DOWN:
