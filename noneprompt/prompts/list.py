@@ -1,4 +1,5 @@
 import os
+from time import time
 from functools import lru_cache
 from typing import List, TypeVar, Callable, Optional
 
@@ -65,6 +66,8 @@ class ListPrompt(BasePrompt[Choice[RT]]):
         self._index: int = 0
         self._display_index: int = 0
         self._max_height: Optional[int] = max_height
+        self._app: Application = None  # type: ignore
+        self._last_mouse_up: float = 0
 
     @property
     def max_height(self) -> int:
@@ -152,7 +155,17 @@ class ListPrompt(BasePrompt[Choice[RT]]):
 
         @kb.add("enter", eager=True)
         def enter(event: KeyPressEvent):
-            # no answer selected
+            self._finish()
+
+        @kb.add("c-c", eager=True)
+        @kb.add("c-q", eager=True)
+        def quit(event: KeyPressEvent):
+            event.app.exit(result=NO_ANSWER)
+
+        return kb
+
+    def _finish(self) -> None:
+        # no answer selected
             if not self.filtered_choices:
                 return
 
@@ -161,14 +174,7 @@ class ListPrompt(BasePrompt[Choice[RT]]):
             self._answered = result
             # then clear buffer
             self._buffer.reset()
-            event.app.exit(result=result)
-
-        @kb.add("c-c", eager=True)
-        @kb.add("c-q", eager=True)
-        def quit(event: KeyPressEvent):
-            event.app.exit(result=NO_ANSWER)
-
-        return kb
+            self._app.exit(result=result)
 
     def _get_line_prefix(self, line_number: int, wrap_count: int) -> AnyFormattedText:
         return self._get_prompt()
@@ -236,6 +242,10 @@ class ListPrompt(BasePrompt[Choice[RT]]):
         def _handle_mouse(event: MouseEvent) -> None:
             if event.event_type == MouseEventType.MOUSE_UP and index is not None:
                 self._jump_to(index)
+                if (time() - self._last_mouse_up) < 0.3:
+                    self._finish()
+                else:
+                    self._last_mouse_up = time()
             elif event.event_type == MouseEventType.SCROLL_UP:
                 self._handle_up()
             elif event.event_type == MouseEventType.SCROLL_DOWN:
