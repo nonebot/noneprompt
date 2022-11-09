@@ -1,4 +1,5 @@
 import os
+from time import time
 from functools import lru_cache
 from typing import List, TypeVar, Callable, Optional
 
@@ -7,6 +8,7 @@ from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.layout import Layout
 from prompt_toolkit.filters import is_done
 from prompt_toolkit.lexers import SimpleLexer
+from prompt_toolkit.application import get_app
 from prompt_toolkit.enums import DEFAULT_BUFFER
 from prompt_toolkit.layout.dimension import Dimension
 from prompt_toolkit.formatted_text import AnyFormattedText
@@ -65,6 +67,9 @@ class ListPrompt(BasePrompt[Choice[RT]]):
         self._index: int = 0
         self._display_index: int = 0
         self._max_height: Optional[int] = max_height
+
+        self._last_mouse_up: float = 0
+        self._last_mouse_index: int = 0
 
     @property
     def max_height(self) -> int:
@@ -152,16 +157,7 @@ class ListPrompt(BasePrompt[Choice[RT]]):
 
         @kb.add("enter", eager=True)
         def enter(event: KeyPressEvent):
-            # no answer selected
-            if not self.filtered_choices:
-                return
-
-            # get result first
-            result = self.filtered_choices[self._index]
-            self._answered = result
-            # then clear buffer
-            self._buffer.reset()
-            event.app.exit(result=result)
+            self._finish()
 
         @kb.add("c-c", eager=True)
         @kb.add("c-q", eager=True)
@@ -169,6 +165,18 @@ class ListPrompt(BasePrompt[Choice[RT]]):
             event.app.exit(result=NO_ANSWER)
 
         return kb
+
+    def _finish(self) -> None:
+        # no answer selected
+        if not self.filtered_choices:
+            return
+
+        # get result first
+        result = self.filtered_choices[self._index]
+        self._answered = result
+        # then clear buffer
+        self._buffer.reset()
+        get_app().exit(result=result)
 
     def _get_line_prefix(self, line_number: int, wrap_count: int) -> AnyFormattedText:
         return self._get_prompt()
@@ -236,6 +244,13 @@ class ListPrompt(BasePrompt[Choice[RT]]):
         def _handle_mouse(event: MouseEvent) -> None:
             if event.event_type == MouseEventType.MOUSE_UP and index is not None:
                 self._jump_to(index)
+                if (
+                    time() - self._last_mouse_up
+                ) < 0.3 and index == self._last_mouse_index:
+                    self._finish()
+                else:
+                    self._last_mouse_up = time()
+                    self._last_mouse_index = index
             elif event.event_type == MouseEventType.SCROLL_UP:
                 self._handle_up()
             elif event.event_type == MouseEventType.SCROLL_DOWN:
