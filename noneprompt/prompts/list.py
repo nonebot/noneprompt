@@ -166,15 +166,15 @@ class ListPrompt(BasePrompt[Choice[RT]]):
 
     def _finish(self) -> None:
         # no answer selected
-            if not self.filtered_choices:
-                return
+        if not self.filtered_choices:
+            return
 
-            # get result first
-            result = self.filtered_choices[self._index]
-            self._answered = result
-            # then clear buffer
-            self._buffer.reset()
-            self._app.exit(result=result)
+        # get result first
+        result = self.filtered_choices[self._index]
+        self._answered = result
+        # then clear buffer
+        self._buffer.reset()
+        self._app.exit(result=result)
 
     def _get_line_prefix(self, line_number: int, wrap_count: int) -> AnyFormattedText:
         return self._get_prompt()
