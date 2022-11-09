@@ -8,6 +8,7 @@ from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.layout import Layout
 from prompt_toolkit.filters import is_done
 from prompt_toolkit.lexers import SimpleLexer
+from prompt_toolkit.application import get_app
 from prompt_toolkit.enums import DEFAULT_BUFFER
 from prompt_toolkit.layout.dimension import Dimension
 from prompt_toolkit.formatted_text import AnyFormattedText
@@ -66,7 +67,6 @@ class ListPrompt(BasePrompt[Choice[RT]]):
         self._index: int = 0
         self._display_index: int = 0
         self._max_height: Optional[int] = max_height
-        self._app: Application = None  # type: ignore
         self._last_mouse_up: float = 0
 
     @property
@@ -174,7 +174,7 @@ class ListPrompt(BasePrompt[Choice[RT]]):
         self._answered = result
         # then clear buffer
         self._buffer.reset()
-        self._app.exit(result=result)
+        get_app().exit(result=result)
 
     def _get_line_prefix(self, line_number: int, wrap_count: int) -> AnyFormattedText:
         return self._get_prompt()
