@@ -57,7 +57,7 @@ class CheckboxPrompt(BasePrompt[Tuple[Choice[RT], ...]]):
         self.default_select: Set[int] = (
             set()
             if default_select is None
-            else set(index % len(self.choices) for index in default_select)
+            else {index % len(self.choices) for index in default_select}
         )
         self.question_mark: str = "[?]" if question_mark is None else question_mark
         self.pointer: str = "❯" if pointer is None else pointer
