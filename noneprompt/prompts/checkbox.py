@@ -42,6 +42,7 @@ class CheckboxPrompt(BasePrompt[Tuple[Choice[RT], ...]]):
         self,
         question: str,
         choices: List[Choice[RT]],
+        default_select: Optional[List[int]] = None,
         *,
         question_mark: Optional[str] = None,
         pointer: Optional[str] = None,
@@ -53,6 +54,11 @@ class CheckboxPrompt(BasePrompt[Tuple[Choice[RT], ...]]):
     ):
         self.question: str = question
         self.choices: List[Choice[RT]] = choices
+        self.default_select: Set[int] = (
+            set()
+            if default_select is None
+            else set(index % len(self.choices) for index in default_select)
+        )
         self.question_mark: str = "[?]" if question_mark is None else question_mark
         self.pointer: str = "❯" if pointer is None else pointer
         self.selected_sign: str = "●" if selected_sign is None else selected_sign
@@ -73,7 +79,7 @@ class CheckboxPrompt(BasePrompt[Tuple[Choice[RT], ...]]):
 
     def _reset(self):
         self._answered: bool = False
-        self._selected: Set[int] = set()
+        self._selected: Set[int] = self.default_select.copy()
 
     def _build_layout(self) -> Layout:
         self._reset()

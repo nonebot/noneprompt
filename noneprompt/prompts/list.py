@@ -48,6 +48,7 @@ class ListPrompt(BasePrompt[Choice[RT]]):
         question: str,
         choices: List[Choice[RT]],
         allow_filter: bool = True,
+        default_select: Optional[int] = None,
         *,
         question_mark: Optional[str] = None,
         pointer: Optional[str] = None,
@@ -64,7 +65,7 @@ class ListPrompt(BasePrompt[Choice[RT]]):
             if annotation is None
             else annotation
         )
-        self._index: int = 0
+        self._index: int = (default_select or 0) % len(self.choices)
         self._display_index: int = 0
         self._max_height: Optional[int] = max_height
 

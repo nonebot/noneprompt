@@ -26,7 +26,6 @@ noneprompt = "noneprompt.__main__:main"
 
 [tool.black]
 line-length = 88
-target-version = ["py38", "py39", "py310"]
 include = '\.pyi?$'
 extend-exclude = '''
 '''
