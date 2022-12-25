@@ -22,6 +22,7 @@ from ._options import (
 def list_prompt_main(
     question: str,
     choices: List[str],
+    default_select: Optional[int] = None,
     *,
     no_ansi: bool = False,
     default: Optional[str] = None,
@@ -41,6 +42,7 @@ def list_prompt_main(
     prompt = ListPrompt(
         question,
         choices=[Choice(c) for c in choices],
+        default_select=default_select,
         question_mark=question_mark,
         pointer=pointer,
         annotation=annotation,
@@ -77,6 +79,9 @@ list_prompt = subparsers.add_parser(
         select_style_option,
         unselect_style_option,
     ],
+)
+list_prompt.add_argument(
+    "-d", "--default-select", type=int, required=False, help="default select"
 )
 list_prompt.add_argument("question", help="prompt question")
 list_prompt.add_argument("choices", nargs="+", help="choices")

@@ -25,6 +25,7 @@ from ._options import (
 def checkbox_prompt_main(
     question: str,
     choices: List[str],
+    default_select: Optional[List[int]] = None,
     *,
     no_ansi: bool = False,
     default: Optional[str] = None,
@@ -47,6 +48,7 @@ def checkbox_prompt_main(
     prompt = CheckboxPrompt(
         question,
         choices=[Choice(c) for c in choices],
+        default_select=default_select,
         question_mark=question_mark,
         pointer=pointer,
         selected_sign=sign,
@@ -89,6 +91,14 @@ checkbox_prompt = subparsers.add_parser(
         select_style_option,
         unselect_style_option,
     ],
+)
+checkbox_prompt.add_argument(
+    "-d",
+    "--default-select",
+    action="append",
+    type=int,
+    required=False,
+    help="default select",
 )
 checkbox_prompt.add_argument("question", help="prompt question")
 checkbox_prompt.add_argument("choices", nargs="+", help="choices")
