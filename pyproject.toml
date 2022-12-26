@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "noneprompt"
-version = "0.1.6"
+version = "0.1.7"
 description = "Prompt toolkit for console interaction"
 authors = ["yanyongyu <yyy@nonebot.dev>"]
 license = "MIT"
