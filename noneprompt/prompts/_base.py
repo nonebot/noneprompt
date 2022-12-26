@@ -90,4 +90,36 @@ class BasePrompt(abc.ABC, Generic[RT]):
             return result
         if default is UNDEFINED:
             raise CancelledError("No answer selected!")
-        return default
+        return default  # type: ignore
+
+    @overload
+    async def prompt_async(
+        self,
+        default: UndefinedType = UNDEFINED,
+        no_ansi: bool = False,
+        style: Optional[Style] = None,
+    ) -> RT:
+        ...
+
+    @overload
+    async def prompt_async(
+        self,
+        default: DT,
+        no_ansi: bool = False,
+        style: Optional[Style] = None,
+    ) -> Union[DT, RT]:
+        ...
+
+    async def prompt_async(
+        self,
+        default: Union[DT, UndefinedType] = UNDEFINED,
+        no_ansi: bool = False,
+        style: Optional[Style] = None,
+    ) -> Union[DT, RT]:
+        app = self._build_application(no_ansi=no_ansi, style=style or Style([]))
+        result: RT = await app.run_async()
+        if result is not NO_ANSWER:
+            return result
+        if default is UNDEFINED:
+            raise CancelledError("No answer selected!")
+        return default  # type: ignore
