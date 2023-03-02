@@ -1,18 +1,24 @@
 from typing import Union, Callable, Optional
 
 from prompt_toolkit.styles import Style
-from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.layout import Layout
-from prompt_toolkit.filters import Filter
 from prompt_toolkit.application import get_app
 from prompt_toolkit.enums import DEFAULT_BUFFER
 from prompt_toolkit.validation import Validator
-from prompt_toolkit.layout.controls import BufferControl
+from prompt_toolkit.buffer import Buffer, ValidationState
 from prompt_toolkit.formatted_text import AnyFormattedText
-from prompt_toolkit.layout.containers import HSplit, Window
 from prompt_toolkit.lexers import SimpleLexer, DynamicLexer
+from prompt_toolkit.filters import Filter, Condition, is_done
 from prompt_toolkit.key_binding import KeyBindings, KeyPressEvent
+from prompt_toolkit.layout.controls import BufferControl, FormattedTextControl
 from prompt_toolkit.layout.processors import PasswordProcessor, ConditionalProcessor
+from prompt_toolkit.layout.containers import (
+    Float,
+    HSplit,
+    Window,
+    FloatContainer,
+    ConditionalContainer,
+)
 
 from ._base import NO_ANSWER, BasePrompt
 
@@ -26,6 +32,10 @@ class InputPrompt(BasePrompt[str]):
     [?] Choose a choice and return? answer
     └┬┘ └──────────────┬──────────┘ └──┬─┘
     questionmark    question      input/answer
+
+    Invalid input
+    └─────┬─────┘
+        error
     ```
     """
 
@@ -37,20 +47,25 @@ class InputPrompt(BasePrompt[str]):
         *,
         question_mark: Optional[str] = None,
         validator: Optional[Callable[[str], bool]] = None,
+        error_message: Optional[str] = "Invalid input",
     ):
         self.question: str = question
         self.default_text: Optional[str] = default_text
         self.is_password: Union[bool, Filter] = is_password
         self.question_mark: str = "[?]" if question_mark is None else question_mark
         self.validator: Optional[Callable[[str], bool]] = validator
+        self.error_message: Optional[str] = error_message
 
     def _reset(self):
         self._answered: bool = False
+        self._valid: bool = True
         self._buffer: Buffer = Buffer(
             name=DEFAULT_BUFFER,
-            validator=self.validator and Validator.from_callable(self.validator),
+            validator=self.validator
+            and Validator.from_callable(self.validator, move_cursor_to_end=True),
             accept_handler=self._submit,
             multiline=False,
+            on_text_changed=self._on_text_changed,
         )
         if self.default_text:
             self._buffer.insert_text(self.default_text)
@@ -78,7 +93,19 @@ class InputPrompt(BasePrompt[str]):
                         ),
                         dont_extend_height=True,
                         get_line_prefix=self._get_prompt,
-                    )
+                    ),
+                    ConditionalContainer(
+                        Window(
+                            FormattedTextControl(self._get_error_message),
+                            height=1,
+                            dont_extend_height=True,
+                            always_hide_cursor=True,
+                        ),
+                        Condition(
+                            lambda: self.error_message is not None and not self._valid
+                        )
+                        & ~is_done,
+                    ),
                 ]
             )
         )
@@ -89,6 +116,7 @@ class InputPrompt(BasePrompt[str]):
                 ("questionmark", "fg:#673AB7 bold"),
                 ("question", "bold"),
                 ("answer", "fg:#FF9D00"),
+                ("error", "bg:#FF0000"),
             ]
         )
         return Style([*default.style_rules, *style.style_rules])
@@ -99,6 +127,8 @@ class InputPrompt(BasePrompt[str]):
         @kb.add("enter", eager=True)
         def enter(event: KeyPressEvent):
             self._buffer.validate_and_handle()
+            if self._buffer.validation_state == ValidationState.INVALID:
+                self._valid = False
 
         @kb.add("c-c", eager=True)
         @kb.add("c-q", eager=True)
@@ -116,7 +146,15 @@ class InputPrompt(BasePrompt[str]):
         prompts.append(("", " "))
         return prompts
 
+    def _get_error_message(self) -> AnyFormattedText:
+        return self.error_message and [("class:error", self.error_message)]
+
     def _submit(self, buffer: Buffer) -> bool:
         self._answered = True
         get_app().exit(result=buffer.document.text)
         return True
+
+    def _on_text_changed(self, buffer: Buffer) -> None:
+        # reset validation state
+        if self._valid == False:
+            self._valid = True
