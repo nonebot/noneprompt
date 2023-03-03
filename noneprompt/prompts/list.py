@@ -6,16 +6,22 @@ from typing import List, TypeVar, Callable, Optional
 from prompt_toolkit.styles import Style
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.layout import Layout
-from prompt_toolkit.filters import is_done
 from prompt_toolkit.lexers import SimpleLexer
 from prompt_toolkit.application import get_app
 from prompt_toolkit.enums import DEFAULT_BUFFER
+from prompt_toolkit.filters import Condition, is_done
 from prompt_toolkit.layout.dimension import Dimension
 from prompt_toolkit.formatted_text import AnyFormattedText
 from prompt_toolkit.key_binding import KeyBindings, KeyPressEvent
 from prompt_toolkit.mouse_events import MouseEvent, MouseEventType
 from prompt_toolkit.layout.controls import BufferControl, FormattedTextControl
-from prompt_toolkit.layout.containers import HSplit, Window, ConditionalContainer
+from prompt_toolkit.layout.containers import (
+    Float,
+    HSplit,
+    Window,
+    FloatContainer,
+    ConditionalContainer,
+)
 
 from ._choice import Choice
 from ._base import NO_ANSWER, BasePrompt
@@ -40,6 +46,10 @@ class ListPrompt(BasePrompt[Choice[RT]]):
         choice unselected
         └───────┬───────┘
             unselected
+
+    Invalid input
+    └─────┬─────┘
+        error
     ```
     """
 
@@ -54,6 +64,8 @@ class ListPrompt(BasePrompt[Choice[RT]]):
         pointer: Optional[str] = None,
         annotation: Optional[str] = None,
         max_height: Optional[int] = None,
+        validator: Optional[Callable[[Choice[RT]], bool]] = None,
+        error_message: Optional[str] = "Invalid selection",
     ):
         self.question: str = question
         self.choices: List[Choice[RT]] = choices
@@ -65,6 +77,9 @@ class ListPrompt(BasePrompt[Choice[RT]]):
             if annotation is None
             else annotation
         )
+        self.validator: Optional[Callable[[Choice[RT]], bool]] = validator
+        self.error_message: Optional[str] = error_message
+
         self._index: int = (default_select or 0) % len(self.choices)
         self._display_index: int = 0
         self._max_height: Optional[int] = max_height
@@ -85,16 +100,22 @@ class ListPrompt(BasePrompt[Choice[RT]]):
         ]
 
     def _reset(self):
+        self._invalid: bool = False
         self._answered: Optional[Choice] = None
+        self._reset_choice_layout()
         self._buffer: Buffer = Buffer(
             name=DEFAULT_BUFFER,
             multiline=False,
-            on_text_changed=self._reset_choice_layout,
+            on_text_changed=lambda b: self._reset_choice_layout(),
         )
 
-    def _reset_choice_layout(self, buffer: Buffer):
+    def _reset_choice_layout(self):
         self._index: int = 0
         self._display_index: int = 0
+        self._reset_error()
+
+    def _reset_error(self):
+        self._invalid = False
 
     def _build_layout(self) -> Layout:
         self._reset()
@@ -117,19 +138,39 @@ class ListPrompt(BasePrompt[Choice[RT]]):
             )
 
         return Layout(
-            HSplit(
-                [
-                    prompt_line,
-                    ConditionalContainer(
-                        Window(
-                            FormattedTextControl(self._get_choices_prompt),
-                            height=Dimension(1),
-                            dont_extend_height=True,
-                            always_hide_cursor=True,
+            FloatContainer(
+                HSplit(
+                    [
+                        prompt_line,
+                        ConditionalContainer(
+                            Window(
+                                FormattedTextControl(self._get_choices_prompt),
+                                height=Dimension(1),
+                                dont_extend_height=True,
+                                always_hide_cursor=True,
+                            ),
+                            ~is_done,
                         ),
-                        ~is_done,
-                    ),
-                ]
+                    ]
+                ),
+                [
+                    Float(
+                        ConditionalContainer(
+                            Window(
+                                FormattedTextControl(self._get_error_prompt),
+                                height=1,
+                                dont_extend_height=True,
+                                always_hide_cursor=True,
+                            ),
+                            Condition(
+                                lambda: self.error_message is not None and self._invalid
+                            )
+                            & ~is_done,
+                        ),
+                        bottom=0,
+                        left=0,
+                    )
+                ],
             )
         )
 
@@ -141,6 +182,7 @@ class ListPrompt(BasePrompt[Choice[RT]]):
                 ("answer", "fg:#FF9D00"),
                 ("annotation", "fg:#7F8C8D"),
                 ("selected", "fg:ansigreen noreverse"),
+                ("error", "bg:#FF0000"),
             ]
         )
         return Style([*default.style_rules, *style.style_rules])
@@ -150,19 +192,23 @@ class ListPrompt(BasePrompt[Choice[RT]]):
 
         @kb.add("up", eager=True)
         def previous(event: KeyPressEvent):
+            self._reset_error()
             self._handle_up()
 
         @kb.add("down", eager=True)
         def next(event: KeyPressEvent):
+            self._reset_error()
             self._handle_down()
 
         @kb.add("enter", eager=True)
         def enter(event: KeyPressEvent):
+            self._reset_error()
             self._finish()
 
         @kb.add("c-c", eager=True)
         @kb.add("c-q", eager=True)
         def quit(event: KeyPressEvent):
+            self._reset_error()
             event.app.exit(result=NO_ANSWER)
 
         return kb
@@ -174,6 +220,12 @@ class ListPrompt(BasePrompt[Choice[RT]]):
 
         # get result first
         result = self.filtered_choices[self._index]
+        # validate result
+        if self.validator is not None:
+            self._invalid = not self.validator(result)
+            if self._invalid:
+                return
+
         self._answered = result
         # then clear buffer
         self._buffer.reset()
@@ -237,6 +289,9 @@ class ListPrompt(BasePrompt[Choice[RT]]):
                     )
                 )
         return prompts
+
+    def _get_error_prompt(self) -> AnyFormattedText:
+        return self.error_message and [("class:error", self.error_message)]
 
     @lru_cache
     def _get_mouse_handler(

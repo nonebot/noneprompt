@@ -4,13 +4,19 @@ from typing import Set, List, Tuple, TypeVar, Callable, Optional
 
 from prompt_toolkit.styles import Style
 from prompt_toolkit.layout import Layout
-from prompt_toolkit.filters import is_done
+from prompt_toolkit.filters import Condition, is_done
 from prompt_toolkit.layout.dimension import Dimension
 from prompt_toolkit.formatted_text import AnyFormattedText
 from prompt_toolkit.layout.controls import FormattedTextControl
 from prompt_toolkit.key_binding import KeyBindings, KeyPressEvent
 from prompt_toolkit.mouse_events import MouseEvent, MouseEventType
-from prompt_toolkit.layout.containers import HSplit, Window, ConditionalContainer
+from prompt_toolkit.layout.containers import (
+    Float,
+    HSplit,
+    Window,
+    FloatContainer,
+    ConditionalContainer,
+)
 
 from ._choice import Choice
 from ._base import NO_ANSWER, BasePrompt
@@ -51,6 +57,7 @@ class CheckboxPrompt(BasePrompt[Tuple[Choice[RT], ...]]):
         annotation: Optional[str] = None,
         max_height: Optional[int] = None,
         validator: Optional[Callable[[Tuple[Choice[RT], ...]], bool]] = None,
+        error_message: Optional[str] = "Invalid selection",
     ):
         self.question: str = question
         self.choices: List[Choice[RT]] = choices
@@ -69,6 +76,8 @@ class CheckboxPrompt(BasePrompt[Tuple[Choice[RT], ...]]):
             else annotation
         )
         self.validator: Optional[Callable[[Tuple[Choice[RT], ...]], bool]] = validator
+        self.error_message: Optional[str] = error_message
+
         self._index: int = 0
         self._display_index: int = 0
         self._max_height: Optional[int] = max_height
@@ -78,30 +87,54 @@ class CheckboxPrompt(BasePrompt[Tuple[Choice[RT], ...]]):
         return self._max_height or os.get_terminal_size().lines
 
     def _reset(self):
+        self._invalid: bool = False
         self._answered: bool = False
         self._selected: Set[int] = self.default_select.copy()
+
+    def _reset_error(self):
+        self._invalid = False
 
     def _build_layout(self) -> Layout:
         self._reset()
         return Layout(
-            HSplit(
-                [
-                    Window(
-                        FormattedTextControl(self._get_prompt),
-                        height=Dimension(1),
-                        dont_extend_height=True,
-                        always_hide_cursor=True,
-                    ),
-                    ConditionalContainer(
+            FloatContainer(
+                HSplit(
+                    [
                         Window(
-                            FormattedTextControl(self._get_choices_prompt),
+                            FormattedTextControl(self._get_prompt),
                             height=Dimension(1),
                             dont_extend_height=True,
                             always_hide_cursor=True,
                         ),
-                        ~is_done,
+                        ConditionalContainer(
+                            Window(
+                                FormattedTextControl(self._get_choices_prompt),
+                                height=Dimension(1),
+                                dont_extend_height=True,
+                                always_hide_cursor=True,
+                            ),
+                            ~is_done,
+                        ),
+                    ]
+                ),
+                [
+                    Float(
+                        ConditionalContainer(
+                            Window(
+                                FormattedTextControl(self._get_error_prompt),
+                                height=1,
+                                dont_extend_height=True,
+                                always_hide_cursor=True,
+                            ),
+                            Condition(
+                                lambda: self.error_message is not None and self._invalid
+                            )
+                            & ~is_done,
+                        ),
+                        bottom=0,
+                        left=0,
                     ),
-                ]
+                ],
             )
         )
 
@@ -114,6 +147,7 @@ class CheckboxPrompt(BasePrompt[Tuple[Choice[RT], ...]]):
                 ("annotation", "fg:#7F8C8D"),
                 ("sign", "fg:ansigreen noreverse"),
                 ("selected", "fg:ansigreen noreverse"),
+                ("error", "bg:#FF0000"),
             ]
         )
         return Style([*default.style_rules, *style.style_rules])
@@ -123,14 +157,17 @@ class CheckboxPrompt(BasePrompt[Tuple[Choice[RT], ...]]):
 
         @kb.add("up", eager=True)
         def previous(event: KeyPressEvent):
+            self._reset_error()
             self._handle_up()
 
         @kb.add("down", eager=True)
         def next(event: KeyPressEvent):
+            self._reset_error()
             self._handle_down()
 
         @kb.add("space", eager=True)
         def select(event: KeyPressEvent):
+            self._reset_error()
             if self._index not in self._selected:
                 self._selected.add(self._index)
             else:
@@ -138,14 +175,19 @@ class CheckboxPrompt(BasePrompt[Tuple[Choice[RT], ...]]):
 
         @kb.add("enter", eager=True)
         def enter(event: KeyPressEvent):
-            if self.validator and not self.validator(self._get_result()):
-                return
+            self._reset_error()
+            if self.validator is not None:
+                self._invalid = not self.validator(self._get_result())
+                if self._invalid:
+                    return
+
             self._answered = True
             event.app.exit(result=self._get_result())
 
         @kb.add("c-c", eager=True)
         @kb.add("c-q", eager=True)
         def quit(event: KeyPressEvent):
+            self._reset_error()
             event.app.exit(result=NO_ANSWER)
 
         return kb
@@ -233,6 +275,9 @@ class CheckboxPrompt(BasePrompt[Tuple[Choice[RT], ...]]):
                     )
                 )
         return prompts
+
+    def _get_error_prompt(self) -> AnyFormattedText:
+        return self.error_message and [("class:error", self.error_message)]
 
     def _get_result(self) -> Tuple[Choice[RT], ...]:
         return tuple(

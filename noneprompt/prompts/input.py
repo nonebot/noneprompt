@@ -58,7 +58,7 @@ class InputPrompt(BasePrompt[str]):
 
     def _reset(self):
         self._answered: bool = False
-        self._valid: bool = True
+        self._invalid: bool = False
         self._buffer: Buffer = Buffer(
             name=DEFAULT_BUFFER,
             validator=self.validator
@@ -96,13 +96,13 @@ class InputPrompt(BasePrompt[str]):
                     ),
                     ConditionalContainer(
                         Window(
-                            FormattedTextControl(self._get_error_message),
+                            FormattedTextControl(self._get_error_prompt),
                             height=1,
                             dont_extend_height=True,
                             always_hide_cursor=True,
                         ),
                         Condition(
-                            lambda: self.error_message is not None and not self._valid
+                            lambda: self.error_message is not None and self._invalid
                         )
                         & ~is_done,
                     ),
@@ -128,7 +128,7 @@ class InputPrompt(BasePrompt[str]):
         def enter(event: KeyPressEvent):
             self._buffer.validate_and_handle()
             if self._buffer.validation_state == ValidationState.INVALID:
-                self._valid = False
+                self._invalid = True
 
         @kb.add("c-c", eager=True)
         @kb.add("c-q", eager=True)
@@ -146,7 +146,7 @@ class InputPrompt(BasePrompt[str]):
         prompts.append(("", " "))
         return prompts
 
-    def _get_error_message(self) -> AnyFormattedText:
+    def _get_error_prompt(self) -> AnyFormattedText:
         return self.error_message and [("class:error", self.error_message)]
 
     def _submit(self, buffer: Buffer) -> bool:
@@ -156,5 +156,5 @@ class InputPrompt(BasePrompt[str]):
 
     def _on_text_changed(self, buffer: Buffer) -> None:
         # reset validation state
-        if self._valid == False:
-            self._valid = True
+        if self._invalid == True:
+            self._invalid = False
