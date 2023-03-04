@@ -1,6 +1,7 @@
 import os
 from time import time
 from functools import lru_cache
+from gettext import gettext as _
 from typing import List, TypeVar, Callable, Optional
 
 from prompt_toolkit.styles import Style
@@ -65,7 +66,7 @@ class ListPrompt(BasePrompt[Choice[RT]]):
         annotation: Optional[str] = None,
         max_height: Optional[int] = None,
         validator: Optional[Callable[[Choice[RT]], bool]] = None,
-        error_message: Optional[str] = "Invalid selection",
+        error_message: Optional[str] = None,
     ):
         self.question: str = question
         self.choices: List[Choice[RT]] = choices
@@ -73,12 +74,14 @@ class ListPrompt(BasePrompt[Choice[RT]]):
         self.question_mark: str = "[?]" if question_mark is None else question_mark
         self.pointer: str = "❯" if pointer is None else pointer
         self.annotation: str = (
-            "(Use ↑ and ↓ to choose, Enter to submit)"
+            _("(Use ↑ and ↓ to choose, Enter to submit)")
             if annotation is None
             else annotation
         )
         self.validator: Optional[Callable[[Choice[RT]], bool]] = validator
-        self.error_message: Optional[str] = error_message
+        self.error_message: str = (
+            _("Invalid selection") if error_message is None else error_message
+        )
 
         self._index: int = (default_select or 0) % len(self.choices)
         self._display_index: int = 0
@@ -291,13 +294,14 @@ class ListPrompt(BasePrompt[Choice[RT]]):
         return prompts
 
     def _get_error_prompt(self) -> AnyFormattedText:
-        return self.error_message and [("class:error", self.error_message)]
+        return [("class:error", self.error_message, lambda e: self._reset_error())]
 
     @lru_cache
     def _get_mouse_handler(
         self, index: Optional[int] = None
     ) -> Callable[[MouseEvent], None]:
         def _handle_mouse(event: MouseEvent) -> None:
+            self._reset_error()
             if event.event_type == MouseEventType.MOUSE_UP and index is not None:
                 self._jump_to(index)
                 if (

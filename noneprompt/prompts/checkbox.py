@@ -1,5 +1,6 @@
 import os
 from functools import lru_cache
+from gettext import gettext as _
 from typing import Set, List, Tuple, TypeVar, Callable, Optional
 
 from prompt_toolkit.styles import Style
@@ -57,7 +58,7 @@ class CheckboxPrompt(BasePrompt[Tuple[Choice[RT], ...]]):
         annotation: Optional[str] = None,
         max_height: Optional[int] = None,
         validator: Optional[Callable[[Tuple[Choice[RT], ...]], bool]] = None,
-        error_message: Optional[str] = "Invalid selection",
+        error_message: Optional[str] = None,
     ):
         self.question: str = question
         self.choices: List[Choice[RT]] = choices
@@ -71,12 +72,14 @@ class CheckboxPrompt(BasePrompt[Tuple[Choice[RT], ...]]):
         self.selected_sign: str = "●" if selected_sign is None else selected_sign
         self.unselected_sign: str = "○" if unselected_sign is None else unselected_sign
         self.annotation: str = (
-            "(Use ↑ and ↓ to move, Space to select, Enter to submit)"
+            _("(Use ↑ and ↓ to move, Space to select, Enter to submit)")
             if annotation is None
             else annotation
         )
         self.validator: Optional[Callable[[Tuple[Choice[RT], ...]], bool]] = validator
-        self.error_message: Optional[str] = error_message
+        self.error_message: str = (
+            _("Invalid selection") if error_message is None else error_message
+        )
 
         self._index: int = 0
         self._display_index: int = 0
@@ -127,7 +130,7 @@ class CheckboxPrompt(BasePrompt[Tuple[Choice[RT], ...]]):
                                 always_hide_cursor=True,
                             ),
                             Condition(
-                                lambda: self.error_message is not None and self._invalid
+                                lambda: bool(self.error_message and self._invalid)
                             )
                             & ~is_done,
                         ),
@@ -277,7 +280,7 @@ class CheckboxPrompt(BasePrompt[Tuple[Choice[RT], ...]]):
         return prompts
 
     def _get_error_prompt(self) -> AnyFormattedText:
-        return self.error_message and [("class:error", self.error_message)]
+        return [("class:error", self.error_message, lambda e: self._reset_error())]
 
     def _get_result(self) -> Tuple[Choice[RT], ...]:
         return tuple(
@@ -291,6 +294,7 @@ class CheckboxPrompt(BasePrompt[Tuple[Choice[RT], ...]]):
         self, index: Optional[int] = None
     ) -> Callable[[MouseEvent], None]:
         def _handle_mouse(event: MouseEvent) -> None:
+            self._reset_error()
             if event.event_type == MouseEventType.MOUSE_UP and index is not None:
                 self._jump_to(index)
                 if self._index not in self._selected:

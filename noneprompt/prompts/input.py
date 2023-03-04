@@ -1,3 +1,4 @@
+from gettext import gettext as _
 from typing import Union, Callable, Optional
 
 from prompt_toolkit.styles import Style
@@ -11,14 +12,8 @@ from prompt_toolkit.lexers import SimpleLexer, DynamicLexer
 from prompt_toolkit.filters import Filter, Condition, is_done
 from prompt_toolkit.key_binding import KeyBindings, KeyPressEvent
 from prompt_toolkit.layout.controls import BufferControl, FormattedTextControl
+from prompt_toolkit.layout.containers import HSplit, Window, ConditionalContainer
 from prompt_toolkit.layout.processors import PasswordProcessor, ConditionalProcessor
-from prompt_toolkit.layout.containers import (
-    Float,
-    HSplit,
-    Window,
-    FloatContainer,
-    ConditionalContainer,
-)
 
 from ._base import NO_ANSWER, BasePrompt
 
@@ -47,14 +42,16 @@ class InputPrompt(BasePrompt[str]):
         *,
         question_mark: Optional[str] = None,
         validator: Optional[Callable[[str], bool]] = None,
-        error_message: Optional[str] = "Invalid input",
+        error_message: Optional[str] = None,
     ):
         self.question: str = question
         self.default_text: Optional[str] = default_text
         self.is_password: Union[bool, Filter] = is_password
         self.question_mark: str = "[?]" if question_mark is None else question_mark
         self.validator: Optional[Callable[[str], bool]] = validator
-        self.error_message: Optional[str] = error_message
+        self.error_message: str = (
+            _("Invalid input") if error_message is None else error_message
+        )
 
     def _reset(self):
         self._answered: bool = False
@@ -69,6 +66,9 @@ class InputPrompt(BasePrompt[str]):
         )
         if self.default_text:
             self._buffer.insert_text(self.default_text)
+
+    def _reset_error(self):
+        self._invalid = False
 
     def _build_layout(self) -> Layout:
         self._reset()
@@ -147,7 +147,7 @@ class InputPrompt(BasePrompt[str]):
         return prompts
 
     def _get_error_prompt(self) -> AnyFormattedText:
-        return self.error_message and [("class:error", self.error_message)]
+        return [("class:error", self.error_message, lambda e: self._reset_error())]
 
     def _submit(self, buffer: Buffer) -> bool:
         self._answered = True
@@ -155,6 +155,4 @@ class InputPrompt(BasePrompt[str]):
         return True
 
     def _on_text_changed(self, buffer: Buffer) -> None:
-        # reset validation state
-        if self._invalid == True:
-            self._invalid = False
+        self._reset_error()

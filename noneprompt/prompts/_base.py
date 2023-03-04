@@ -1,4 +1,5 @@
 import abc
+from gettext import gettext as _
 from typing import Union, Generic, TypeVar, Optional, overload
 
 from prompt_toolkit.layout import Layout
@@ -89,7 +90,7 @@ class BasePrompt(abc.ABC, Generic[RT]):
         if result is not NO_ANSWER:
             return result
         if default is UNDEFINED:
-            raise CancelledError("No answer selected!")
+            raise CancelledError(_("No answer selected!"))
         return default  # type: ignore
 
     @overload
@@ -121,5 +122,5 @@ class BasePrompt(abc.ABC, Generic[RT]):
         if result is not NO_ANSWER:
             return result
         if default is UNDEFINED:
-            raise CancelledError("No answer selected!")
+            raise CancelledError(_("No answer selected!"))
         return default  # type: ignore
