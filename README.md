@@ -48,6 +48,23 @@ CheckboxPrompt("Choose your favorite colors", choices=[Choice("Red"), Choice("Bl
 await CheckboxPrompt("Choose your favorite colors", choices=[Choice("Red"), Choice("Blue")]).prompt_async()
 ```
 
+## Choice Data
+
+You can add data to choices. Result type can be inferred from the data type.
+
+```python
+from noneprompt import ListPrompt, Choice
+
+result: Choice[str] = ListPrompt(
+    "What is your favorite color?",
+    choices=[
+        Choice("Red", data="#FF0000"),
+        Choice("Blue", data="#0000FF"),
+    ],
+).prompt()
+print(result.data)
+```
+
 ## Defaults and Cancellation
 
 ```python
