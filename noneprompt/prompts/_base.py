@@ -67,8 +67,7 @@ class BasePrompt(abc.ABC, Generic[RT]):
         default: UndefinedType = UNDEFINED,
         no_ansi: bool = False,
         style: Optional[Style] = None,
-    ) -> RT:
-        ...
+    ) -> RT: ...
 
     @overload
     def prompt(
@@ -76,8 +75,7 @@ class BasePrompt(abc.ABC, Generic[RT]):
         default: DT,
         no_ansi: bool = False,
         style: Optional[Style] = None,
-    ) -> Union[DT, RT]:
-        ...
+    ) -> Union[DT, RT]: ...
 
     def prompt(
         self,
@@ -99,8 +97,7 @@ class BasePrompt(abc.ABC, Generic[RT]):
         default: UndefinedType = UNDEFINED,
         no_ansi: bool = False,
         style: Optional[Style] = None,
-    ) -> RT:
-        ...
+    ) -> RT: ...
 
     @overload
     async def prompt_async(
@@ -108,8 +105,7 @@ class BasePrompt(abc.ABC, Generic[RT]):
         default: DT,
         no_ansi: bool = False,
         style: Optional[Style] = None,
-    ) -> Union[DT, RT]:
-        ...
+    ) -> Union[DT, RT]: ...
 
     async def prompt_async(
         self,
