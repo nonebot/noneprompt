@@ -1,15 +1,16 @@
 {
-  "name": "Default Linux Universal",
-  "image": "mcr.microsoft.com/devcontainers/universal:2-linux",
+  "name": "Ubuntu",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
   "features": {
-    "ghcr.io/devcontainers-extra/features/poetry:2": {}
+    "ghcr.io/devcontainers-extra/features/poetry:2": {},
+    "ghcr.io/meaningful-ooo/devcontainer-features/fish:2": {}
   },
   "postCreateCommand": "poetry config virtualenvs.in-project true && poetry install && poetry run pre-commit install",
   "customizations": {
     "vscode": {
       "settings": {
         "python.analysis.diagnosticMode": "workspace",
-        "python.analysis.typeCheckingMode": "basic",
+        "python.analysis.typeCheckingMode": "standard",
         "[python]": {
           "editor.defaultFormatter": "ms-python.black-formatter",
           "editor.codeActionsOnSave": {
