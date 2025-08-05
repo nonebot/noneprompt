@@ -12,14 +12,14 @@ keywords = ["prompt", "inquirer", "prompt-toolkit"]
 include = ["noneprompt/py.typed"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.9"
 prompt-toolkit = "^3.0.19"
 
 [tool.poetry.group.dev.dependencies]
 isort = "^5.10.1"
 black = "^23.1.0"
 nonemoji = "^0.1.0"
-pre-commit = "^3.1.0"
+pre-commit = "^4.2.0"
 
 [tool.poetry.scripts]
 noneprompt = "noneprompt.__main__:main"
@@ -40,7 +40,7 @@ extra_standard_library = ["typing_extensions"]
 
 [tool.pyright]
 typeCheckingMode = "standard"
-pythonVersion = "3.8"
+pythonVersion = "3.9"
 pythonPlatform = "All"
 
 [build-system]
