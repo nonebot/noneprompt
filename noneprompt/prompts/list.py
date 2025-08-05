@@ -65,6 +65,7 @@ class ListPrompt(BasePrompt[Choice[RT]]):
         pointer: Optional[str] = None,
         annotation: Optional[str] = None,
         max_height: Optional[int] = None,
+        custom_filter: Optional[Callable[[str, Choice[RT]], bool]] = None,
         validator: Optional[Callable[[Choice[RT]], bool]] = None,
         error_message: Optional[str] = None,
     ):
@@ -77,6 +78,9 @@ class ListPrompt(BasePrompt[Choice[RT]]):
             _("(Use ↑ and ↓ to choose, Enter to submit)")
             if annotation is None
             else annotation
+        )
+        self.filter: Callable[[str, Choice[RT]], bool] = custom_filter or (
+            lambda _in, _ch: _in.lower() in _ch.name.lower()
         )
         self.validator: Optional[Callable[[Choice[RT]], bool]] = validator
         self.error_message: str = (
@@ -97,9 +101,7 @@ class ListPrompt(BasePrompt[Choice[RT]]):
     @property
     def filtered_choices(self) -> List[Choice[RT]]:
         return [
-            choice
-            for choice in self.choices
-            if self._buffer.text.lower() in choice.name.lower()
+            choice for choice in self.choices if self.filter(self._buffer.text, choice)
         ]
 
     def _reset(self):
