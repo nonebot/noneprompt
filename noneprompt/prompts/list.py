@@ -80,7 +80,7 @@ class ListPrompt(BasePrompt[Choice[RT]]):
             else annotation
         )
         self.filter: Callable[[str, Choice[RT]], bool] = custom_filter or (
-            lambda _in, _ch: _in.lower() in _ch.name.lower()
+            lambda text, choice: text.lower() in choice.name.lower()
         )
         self.validator: Optional[Callable[[Choice[RT]], bool]] = validator
         self.error_message: str = (
