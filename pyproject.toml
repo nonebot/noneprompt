@@ -1,28 +1,30 @@
-[tool.poetry]
+[project]
 name = "noneprompt"
 version = "0.1.9"
 description = "Prompt toolkit for console interaction"
-authors = ["yanyongyu <yyy@nonebot.dev>"]
+authors = [{ name = "yanyongyu", email = "yyy@nonebot.dev" }]
 license = "MIT"
 readme = "README.md"
+keywords = ["prompt", "inquirer", "prompt-toolkit"]
+dependencies = ["prompt-toolkit>=3.0.19,<4"]
+requires-python = ">=3.9,<4.0"
+
+[project.urls]
 homepage = "https://github.com/nonebot/noneprompt"
 repository = "https://github.com/nonebot/noneprompt"
 documentation = "https://github.com/nonebot/noneprompt"
-keywords = ["prompt", "inquirer", "prompt-toolkit"]
-include = ["noneprompt/py.typed"]
 
-[tool.poetry.dependencies]
-python = "^3.9"
-prompt-toolkit = "^3.0.19"
+[project.scripts]
+noneprompt = "noneprompt.__main__:main"
+
+[tool.poetry]
+include = ["noneprompt/py.typed"]
 
 [tool.poetry.group.dev.dependencies]
 isort = "^5.10.1"
 black = "^23.1.0"
 nonemoji = "^0.1.0"
 pre-commit = "^4.2.0"
-
-[tool.poetry.scripts]
-noneprompt = "noneprompt.__main__:main"
 
 [tool.black]
 line-length = 88
@@ -44,5 +46,5 @@ pythonVersion = "3.9"
 pythonPlatform = "All"
 
 [build-system]
-requires = ["poetry_core>=1.0.0"]
+requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
