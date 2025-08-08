@@ -7,7 +7,7 @@ license = "MIT"
 readme = "README.md"
 keywords = ["prompt", "inquirer", "prompt-toolkit"]
 requires-python = ">=3.9, <4.0"
-dependencies = ["prompt-toolkit >=3.0.19, <4"]
+dependencies = ["prompt-toolkit >=3.0.19, <4.0.0"]
 
 [project.urls]
 homepage = "https://github.com/nonebot/noneprompt"
