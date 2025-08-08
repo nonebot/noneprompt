@@ -6,8 +6,8 @@ authors = [{ name = "yanyongyu", email = "yyy@nonebot.dev" }]
 license = "MIT"
 readme = "README.md"
 keywords = ["prompt", "inquirer", "prompt-toolkit"]
-dependencies = ["prompt-toolkit>=3.0.19,<4"]
-requires-python = ">=3.9,<4.0"
+requires-python = ">=3.9, <4.0"
+dependencies = ["prompt-toolkit >=3.0.19, <4"]
 
 [project.urls]
 homepage = "https://github.com/nonebot/noneprompt"
