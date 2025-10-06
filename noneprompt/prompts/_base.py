@@ -1,10 +1,10 @@
 import abc
 from gettext import gettext as _
-from typing import Union, Generic, TypeVar, Optional, overload
+from typing import Generic, Optional, TypeVar, Union, overload
 
-from prompt_toolkit.layout import Layout
 from prompt_toolkit.application import Application
 from prompt_toolkit.key_binding import KeyBindings
+from prompt_toolkit.layout import Layout
 from prompt_toolkit.styles import Attrs, Style, StyleTransformation
 
 DT = TypeVar("DT")

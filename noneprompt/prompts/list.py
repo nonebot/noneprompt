@@ -1,31 +1,31 @@
+from functools import partial
+from gettext import gettext as _
 import os
 from time import time
-from functools import lru_cache
-from gettext import gettext as _
-from typing import List, TypeVar, Callable, Optional
+from typing import Callable, Optional, TypeVar
 
-from prompt_toolkit.styles import Style
-from prompt_toolkit.buffer import Buffer
-from prompt_toolkit.layout import Layout
-from prompt_toolkit.lexers import SimpleLexer
 from prompt_toolkit.application import get_app
+from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.enums import DEFAULT_BUFFER
 from prompt_toolkit.filters import Condition, is_done
-from prompt_toolkit.layout.dimension import Dimension
 from prompt_toolkit.formatted_text import AnyFormattedText
 from prompt_toolkit.key_binding import KeyBindings, KeyPressEvent
-from prompt_toolkit.mouse_events import MouseEvent, MouseEventType
-from prompt_toolkit.layout.controls import BufferControl, FormattedTextControl
+from prompt_toolkit.layout import Layout
 from prompt_toolkit.layout.containers import (
+    ConditionalContainer,
     Float,
+    FloatContainer,
     HSplit,
     Window,
-    FloatContainer,
-    ConditionalContainer,
 )
+from prompt_toolkit.layout.controls import BufferControl, FormattedTextControl
+from prompt_toolkit.layout.dimension import Dimension
+from prompt_toolkit.lexers import SimpleLexer
+from prompt_toolkit.mouse_events import MouseEvent, MouseEventType
+from prompt_toolkit.styles import Style
 
-from ._choice import Choice
 from ._base import NO_ANSWER, BasePrompt
+from ._choice import Choice
 
 RT = TypeVar("RT")
 
@@ -57,7 +57,7 @@ class ListPrompt(BasePrompt[Choice[RT]]):
     def __init__(
         self,
         question: str,
-        choices: List[Choice[RT]],
+        choices: list[Choice[RT]],
         allow_filter: bool = True,
         default_select: Optional[int] = None,
         *,
@@ -70,7 +70,7 @@ class ListPrompt(BasePrompt[Choice[RT]]):
         error_message: Optional[str] = None,
     ):
         self.question: str = question
-        self.choices: List[Choice[RT]] = choices
+        self.choices: list[Choice[RT]] = choices
         self.allow_filter: bool = allow_filter
         self.question_mark: str = "[?]" if question_mark is None else question_mark
         self.pointer: str = "❯" if pointer is None else pointer
@@ -99,7 +99,7 @@ class ListPrompt(BasePrompt[Choice[RT]]):
         return self._max_height or os.get_terminal_size().lines
 
     @property
-    def filtered_choices(self) -> List[Choice[RT]]:
+    def filtered_choices(self) -> list[Choice[RT]]:
         return [
             choice for choice in self.choices if self.filter(self._buffer.text, choice)
         ]
@@ -298,27 +298,24 @@ class ListPrompt(BasePrompt[Choice[RT]]):
     def _get_error_prompt(self) -> AnyFormattedText:
         return [("class:error", self.error_message, lambda e: self._reset_error())]
 
-    @lru_cache
     def _get_mouse_handler(
         self, index: Optional[int] = None
     ) -> Callable[[MouseEvent], None]:
-        def _handle_mouse(event: MouseEvent) -> None:
-            self._reset_error()
-            if event.event_type == MouseEventType.MOUSE_UP and index is not None:
-                self._jump_to(index)
-                if (
-                    time() - self._last_mouse_up
-                ) < 0.3 and index == self._last_mouse_index:
-                    self._finish()
-                else:
-                    self._last_mouse_up = time()
-                    self._last_mouse_index = index
-            elif event.event_type == MouseEventType.SCROLL_UP:
-                self._handle_up()
-            elif event.event_type == MouseEventType.SCROLL_DOWN:
-                self._handle_down()
+        return partial(self._handle_mouse, index=index)
 
-        return _handle_mouse
+    def _handle_mouse(self, event: MouseEvent, index: Optional[int] = None) -> None:
+        self._reset_error()
+        if event.event_type == MouseEventType.MOUSE_UP and index is not None:
+            self._jump_to(index)
+            if (time() - self._last_mouse_up) < 0.3 and index == self._last_mouse_index:
+                self._finish()
+            else:
+                self._last_mouse_up = time()
+                self._last_mouse_index = index
+        elif event.event_type == MouseEventType.SCROLL_UP:
+            self._handle_up()
+        elif event.event_type == MouseEventType.SCROLL_DOWN:
+            self._handle_down()
 
     def _handle_up(self) -> None:
         if self.filtered_choices:

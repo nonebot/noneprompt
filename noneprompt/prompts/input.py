@@ -1,19 +1,19 @@
 from gettext import gettext as _
-from typing import Union, Callable, Optional
+from typing import Callable, Optional, Union
 
-from prompt_toolkit.styles import Style
-from prompt_toolkit.layout import Layout
 from prompt_toolkit.application import get_app
-from prompt_toolkit.enums import DEFAULT_BUFFER
-from prompt_toolkit.validation import Validator
 from prompt_toolkit.buffer import Buffer, ValidationState
+from prompt_toolkit.enums import DEFAULT_BUFFER
+from prompt_toolkit.filters import Condition, Filter, is_done
 from prompt_toolkit.formatted_text import AnyFormattedText
-from prompt_toolkit.lexers import SimpleLexer, DynamicLexer
-from prompt_toolkit.filters import Filter, Condition, is_done
 from prompt_toolkit.key_binding import KeyBindings, KeyPressEvent
+from prompt_toolkit.layout import Layout
+from prompt_toolkit.layout.containers import ConditionalContainer, HSplit, Window
 from prompt_toolkit.layout.controls import BufferControl, FormattedTextControl
-from prompt_toolkit.layout.containers import HSplit, Window, ConditionalContainer
-from prompt_toolkit.layout.processors import PasswordProcessor, ConditionalProcessor
+from prompt_toolkit.layout.processors import ConditionalProcessor, PasswordProcessor
+from prompt_toolkit.lexers import DynamicLexer, SimpleLexer
+from prompt_toolkit.styles import Style
+from prompt_toolkit.validation import Validator
 
 from ._base import NO_ANSWER, BasePrompt
 

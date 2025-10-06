@@ -1,15 +1,15 @@
 from typing import Optional
 
 from noneprompt.prompts import ConfirmPrompt
-from noneprompt.utils import BOOLEAN_STRING, str2bool, build_style
+from noneprompt.utils import build_style, str2bool
 
 from . import subparsers
 from ._options import (
+    annotation_style_option,
     answer_style_option,
     question_mark_option,
-    question_style_option,
-    annotation_style_option,
     question_mark_style_option,
+    question_style_option,
 )
 
 

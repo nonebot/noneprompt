@@ -1,31 +1,31 @@
-from typing import List, Optional
+from typing import Optional
 
+from noneprompt.prompts import CheckboxPrompt, Choice
 from noneprompt.utils import build_style
-from noneprompt.prompts import Choice, CheckboxPrompt
 
 from . import subparsers
 from ._options import (
-    sign_option,
-    unsign_option,
-    pointer_option,
     annotation_option,
-    sign_style_option,
+    annotation_style_option,
     answer_style_option,
-    select_style_option,
-    unsign_style_option,
+    pointer_option,
     pointer_style_option,
     question_mark_option,
-    question_style_option,
-    unselect_style_option,
-    annotation_style_option,
     question_mark_style_option,
+    question_style_option,
+    select_style_option,
+    sign_option,
+    sign_style_option,
+    unselect_style_option,
+    unsign_option,
+    unsign_style_option,
 )
 
 
 def checkbox_prompt_main(
     question: str,
-    choices: List[str],
-    default_select: Optional[List[int]] = None,
+    choices: list[str],
+    default_select: Optional[list[int]] = None,
     *,
     no_ansi: bool = False,
     default: Optional[str] = None,

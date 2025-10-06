@@ -1,31 +1,31 @@
-import os
-from functools import lru_cache
+from functools import partial
 from gettext import gettext as _
-from typing import Set, List, Tuple, TypeVar, Callable, Optional
+import os
+from typing import Callable, Optional, TypeVar
 
-from prompt_toolkit.styles import Style
-from prompt_toolkit.layout import Layout
 from prompt_toolkit.filters import Condition, is_done
-from prompt_toolkit.layout.dimension import Dimension
 from prompt_toolkit.formatted_text import AnyFormattedText
-from prompt_toolkit.layout.controls import FormattedTextControl
 from prompt_toolkit.key_binding import KeyBindings, KeyPressEvent
-from prompt_toolkit.mouse_events import MouseEvent, MouseEventType
+from prompt_toolkit.layout import Layout
 from prompt_toolkit.layout.containers import (
+    ConditionalContainer,
     Float,
+    FloatContainer,
     HSplit,
     Window,
-    FloatContainer,
-    ConditionalContainer,
 )
+from prompt_toolkit.layout.controls import FormattedTextControl
+from prompt_toolkit.layout.dimension import Dimension
+from prompt_toolkit.mouse_events import MouseEvent, MouseEventType
+from prompt_toolkit.styles import Style
 
-from ._choice import Choice
 from ._base import NO_ANSWER, BasePrompt
+from ._choice import Choice
 
 RT = TypeVar("RT")
 
 
-class CheckboxPrompt(BasePrompt[Tuple[Choice[RT], ...]]):
+class CheckboxPrompt(BasePrompt[tuple[Choice[RT], ...]]):
     """Checkbox Prompt that supports auto scrolling.
 
     Style class guide:
@@ -43,13 +43,13 @@ class CheckboxPrompt(BasePrompt[Tuple[Choice[RT], ...]]):
        └┬┘ └───────┬───────┘
       unsign   unselected
     ```
-    """
+    """  # noqa: E501
 
     def __init__(
         self,
         question: str,
-        choices: List[Choice[RT]],
-        default_select: Optional[List[int]] = None,
+        choices: list[Choice[RT]],
+        default_select: Optional[list[int]] = None,
         *,
         question_mark: Optional[str] = None,
         pointer: Optional[str] = None,
@@ -57,12 +57,12 @@ class CheckboxPrompt(BasePrompt[Tuple[Choice[RT], ...]]):
         unselected_sign: Optional[str] = None,
         annotation: Optional[str] = None,
         max_height: Optional[int] = None,
-        validator: Optional[Callable[[Tuple[Choice[RT], ...]], bool]] = None,
+        validator: Optional[Callable[[tuple[Choice[RT], ...]], bool]] = None,
         error_message: Optional[str] = None,
     ):
         self.question: str = question
-        self.choices: List[Choice[RT]] = choices
-        self.default_select: Set[int] = (
+        self.choices: list[Choice[RT]] = choices
+        self.default_select: set[int] = (
             set()
             if default_select is None
             else {index % len(self.choices) for index in default_select}
@@ -76,7 +76,7 @@ class CheckboxPrompt(BasePrompt[Tuple[Choice[RT], ...]]):
             if annotation is None
             else annotation
         )
-        self.validator: Optional[Callable[[Tuple[Choice[RT], ...]], bool]] = validator
+        self.validator: Optional[Callable[[tuple[Choice[RT], ...]], bool]] = validator
         self.error_message: str = (
             _("Invalid selection") if error_message is None else error_message
         )
@@ -92,7 +92,7 @@ class CheckboxPrompt(BasePrompt[Tuple[Choice[RT], ...]]):
     def _reset(self):
         self._invalid: bool = False
         self._answered: bool = False
-        self._selected: Set[int] = self.default_select.copy()
+        self._selected: set[int] = self.default_select.copy()
 
     def _reset_error(self):
         self._invalid = False
@@ -282,31 +282,30 @@ class CheckboxPrompt(BasePrompt[Tuple[Choice[RT], ...]]):
     def _get_error_prompt(self) -> AnyFormattedText:
         return [("class:error", self.error_message, lambda e: self._reset_error())]
 
-    def _get_result(self) -> Tuple[Choice[RT], ...]:
+    def _get_result(self) -> tuple[Choice[RT], ...]:
         return tuple(
             choice
             for index, choice in enumerate(self.choices)
             if index in self._selected
         )
 
-    @lru_cache
     def _get_mouse_handler(
         self, index: Optional[int] = None
     ) -> Callable[[MouseEvent], None]:
-        def _handle_mouse(event: MouseEvent) -> None:
-            self._reset_error()
-            if event.event_type == MouseEventType.MOUSE_UP and index is not None:
-                self._jump_to(index)
-                if self._index not in self._selected:
-                    self._selected.add(self._index)
-                else:
-                    self._selected.remove(self._index)
-            elif event.event_type == MouseEventType.SCROLL_UP:
-                self._handle_up()
-            elif event.event_type == MouseEventType.SCROLL_DOWN:
-                self._handle_down()
+        return partial(self._handle_mouse, index=index)
 
-        return _handle_mouse
+    def _handle_mouse(self, event: MouseEvent, index: Optional[int] = None) -> None:
+        self._reset_error()
+        if event.event_type == MouseEventType.MOUSE_UP and index is not None:
+            self._jump_to(index)
+            if self._index not in self._selected:
+                self._selected.add(self._index)
+            else:
+                self._selected.remove(self._index)
+        elif event.event_type == MouseEventType.SCROLL_UP:
+            self._handle_up()
+        elif event.event_type == MouseEventType.SCROLL_DOWN:
+            self._handle_down()
 
     def _handle_up(self) -> None:
         self._jump_to((self._index - 1) % len(self.choices))

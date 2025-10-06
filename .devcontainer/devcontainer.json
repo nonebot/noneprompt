@@ -2,20 +2,23 @@
   "name": "Ubuntu",
   "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
   "features": {
-    "ghcr.io/devcontainers-extra/features/poetry:2": {},
+    "ghcr.io/jsburckhardt/devcontainer-features/uv:1": {},
     "ghcr.io/meaningful-ooo/devcontainer-features/fish:2": {}
   },
-  "postCreateCommand": "poetry config virtualenvs.in-project true && poetry install && poetry run pre-commit install",
+  "postCreateCommand": "uv sync --all-extras && uv run pre-commit install",
   "customizations": {
     "vscode": {
       "settings": {
-        "python.analysis.diagnosticMode": "workspace",
-        "python.analysis.typeCheckingMode": "standard",
+        "python.analysis.diagnosticMode": "openFilesOnly",
         "[python]": {
-          "editor.defaultFormatter": "ms-python.black-formatter",
+          "editor.defaultFormatter": "charliermarsh.ruff",
           "editor.codeActionsOnSave": {
+            "source.fixAll": "explicit",
             "source.organizeImports": "explicit"
           }
+        },
+        "[markdown]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
         },
         "[javascript]": {
           "editor.defaultFormatter": "esbenp.prettier-vscode"
@@ -43,8 +46,7 @@
       "extensions": [
         "ms-python.python",
         "ms-python.vscode-pylance",
-        "ms-python.isort",
-        "ms-python.black-formatter",
+        "charliermarsh.ruff",
         "EditorConfig.EditorConfig",
         "esbenp.prettier-vscode"
       ]

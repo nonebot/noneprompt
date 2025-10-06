@@ -1,15 +1,15 @@
 from typing import Optional
 
-from noneprompt.utils import build_style
 from noneprompt.prompts import InputPrompt
+from noneprompt.utils import build_style
 
 from . import subparsers
 from ._options import (
-    input_style_option,
     answer_style_option,
+    input_style_option,
     question_mark_option,
-    question_style_option,
     question_mark_style_option,
+    question_style_option,
 )
 
 

@@ -1,5 +1,5 @@
-from typing import Dict, Callable
 from argparse import ArgumentParser
+from typing import Callable
 
 parser = ArgumentParser(prog="noneprompt", description="A simple prompt toolkit.")
 parser.add_argument(
@@ -11,7 +11,10 @@ parser.add_argument(
 
 subparsers = parser.add_subparsers(title="prompt type", required=True)
 
-from . import list, input, confirm, checkbox
+from . import checkbox as _checkbox  # noqa: F401
+from . import confirm as _confirm  # noqa: F401
+from . import input as _input  # noqa: F401
+from . import list as _list  # noqa: F401
 
 
 def main():

@@ -1,16 +1,16 @@
 from typing import Optional
 
-from prompt_toolkit.styles import Style
-from prompt_toolkit.buffer import Buffer
-from prompt_toolkit.layout import Layout
-from prompt_toolkit.lexers import SimpleLexer
 from prompt_toolkit.application import get_app
+from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.enums import DEFAULT_BUFFER
-from prompt_toolkit.validation import Validator
-from prompt_toolkit.layout.controls import BufferControl
 from prompt_toolkit.formatted_text import AnyFormattedText
-from prompt_toolkit.layout.containers import HSplit, Window
 from prompt_toolkit.key_binding import KeyBindings, KeyPressEvent
+from prompt_toolkit.layout import Layout
+from prompt_toolkit.layout.containers import HSplit, Window
+from prompt_toolkit.layout.controls import BufferControl
+from prompt_toolkit.lexers import SimpleLexer
+from prompt_toolkit.styles import Style
+from prompt_toolkit.validation import Validator
 
 from noneprompt.utils import BOOLEAN_STRING, str2bool
 
@@ -105,9 +105,9 @@ class ConfirmPrompt(BasePrompt[bool]):
         return prompts
 
     def _validate(self, input: str) -> bool:
-        if not input and self.default_choice is None:
-            return False
-        elif input and input.lower() not in BOOLEAN_STRING:
+        if (self.default_choice is None and not input) or (  # noqa: SIM103
+            input and input.lower() not in BOOLEAN_STRING
+        ):
             return False
         return True
 

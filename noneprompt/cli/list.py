@@ -1,27 +1,27 @@
-from typing import List, Optional
+from typing import Optional
 
-from noneprompt.utils import build_style
 from noneprompt.prompts import Choice, ListPrompt
+from noneprompt.utils import build_style
 
 from . import subparsers
 from ._options import (
-    pointer_option,
     annotation_option,
+    annotation_style_option,
     answer_style_option,
     filter_style_option,
-    select_style_option,
+    pointer_option,
     pointer_style_option,
     question_mark_option,
-    question_style_option,
-    unselect_style_option,
-    annotation_style_option,
     question_mark_style_option,
+    question_style_option,
+    select_style_option,
+    unselect_style_option,
 )
 
 
 def list_prompt_main(
     question: str,
-    choices: List[str],
+    choices: list[str],
     default_select: Optional[int] = None,
     *,
     no_ansi: bool = False,
