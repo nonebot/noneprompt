@@ -5,7 +5,7 @@ from typing import Generic, Optional, TypeVar, Union, overload
 from prompt_toolkit.application import Application
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.layout import Layout
-from prompt_toolkit.styles import Attrs, Style, StyleTransformation
+from prompt_toolkit.styles import DEFAULT_ATTRS, Attrs, Style, StyleTransformation
 
 DT = TypeVar("DT")
 RT = TypeVar("RT")
@@ -35,7 +35,7 @@ class DisableColorTransformation(StyleTransformation):
 
     def transform_attrs(self, attrs: Attrs) -> Attrs:
         if self.no_ansi:
-            return Attrs("", "", False, False, False, False, False, False, False)
+            return DEFAULT_ATTRS
         return attrs
 
 

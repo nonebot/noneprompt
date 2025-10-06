@@ -1,6 +1,6 @@
 [project]
 name = "noneprompt"
-version = "0.1.9"
+version = "0.1.10"
 description = "Prompt toolkit for console interaction"
 authors = [{ name = "yanyongyu", email = "yyy@nonebot.dev" }]
 requires-python = ">=3.9, <4.0"
