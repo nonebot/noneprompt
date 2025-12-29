@@ -72,7 +72,7 @@ class ListPrompt(BasePrompt[Choice[RT]]):
         self.question: str = question
         self.choices: list[Choice[RT]] = choices
         self.allow_filter: bool = allow_filter
-        self.default_select = default_select
+        self.default_select: Optional[int] = default_select
         self.question_mark: str = "[?]" if question_mark is None else question_mark
         self.pointer: str = "❯" if pointer is None else pointer
         self.annotation: str = (
