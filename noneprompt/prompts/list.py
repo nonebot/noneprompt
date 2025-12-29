@@ -72,6 +72,7 @@ class ListPrompt(BasePrompt[Choice[RT]]):
         self.question: str = question
         self.choices: list[Choice[RT]] = choices
         self.allow_filter: bool = allow_filter
+        self.default_select: Optional[int] = default_select
         self.question_mark: str = "[?]" if question_mark is None else question_mark
         self.pointer: str = "❯" if pointer is None else pointer
         self.annotation: str = (
@@ -87,7 +88,7 @@ class ListPrompt(BasePrompt[Choice[RT]]):
             _("Invalid selection") if error_message is None else error_message
         )
 
-        self._index: int = (default_select or 0) % len(self.choices)
+        self._index: int = (self.default_select or 0) % len(self.choices)
         self._display_index: int = 0
         self._max_height: Optional[int] = max_height
 
@@ -115,7 +116,7 @@ class ListPrompt(BasePrompt[Choice[RT]]):
         )
 
     def _reset_choice_layout(self):
-        self._index: int = 0
+        self._index: int = (self.default_select or 0) % len(self.choices)
         self._display_index: int = 0
         self._reset_error()
 
