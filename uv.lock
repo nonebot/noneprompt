@@ -61,7 +61,7 @@ wheels = [
 
 [[package]]
 name = "noneprompt"
-version = "0.1.10"
+version = "0.1.11"
 source = { editable = "." }
 dependencies = [
     { name = "prompt-toolkit" },
