@@ -35,8 +35,12 @@ await ConfirmPrompt("Are you sure?", default_choice=False).prompt_async()
 ```python
 from noneprompt import ListPrompt, Choice
 
-ListPrompt("What is your favorite color?", choices=[Choice("Red"), Choice("Blue")]).prompt()
-await ListPrompt("What is your favorite color?", choices=[Choice("Red"), Choice("Blue")]).prompt_async()
+ListPrompt(
+    "What is your favorite color?", choices=[Choice("Red"), Choice("Blue")]
+).prompt()
+await ListPrompt(
+    "What is your favorite color?", choices=[Choice("Red"), Choice("Blue")]
+).prompt_async()
 ```
 
 ### Checkbox
@@ -44,8 +48,12 @@ await ListPrompt("What is your favorite color?", choices=[Choice("Red"), Choice(
 ```python
 from noneprompt import CheckboxPrompt, Choice
 
-CheckboxPrompt("Choose your favorite colors", choices=[Choice("Red"), Choice("Blue")]).prompt()
-await CheckboxPrompt("Choose your favorite colors", choices=[Choice("Red"), Choice("Blue")]).prompt_async()
+CheckboxPrompt(
+    "Choose your favorite colors", choices=[Choice("Red"), Choice("Blue")]
+).prompt()
+await CheckboxPrompt(
+    "Choose your favorite colors", choices=[Choice("Red"), Choice("Blue")]
+).prompt_async()
 ```
 
 ## Choice Data
